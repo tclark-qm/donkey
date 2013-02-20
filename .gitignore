@@ -1,0 +1,14 @@
+.idea
+*.ipr
+*.iml
+*.iws
+*.class
+target
+.DS_Store
+luceneindex/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
