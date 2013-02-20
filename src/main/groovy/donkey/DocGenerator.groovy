@@ -47,10 +47,21 @@ class DocGenerator extends AbstractProcessor
                     }
                 }
                 table {
+                    thead {
+                        tr {
+                            th('Path')
+                            th('Method')
+                            th('Consumes')
+                            th('Produces')
+                        }
+                    }
                     docs.each { d ->
                         tr {
-                            td(d.method)
                             td(d.path)
+                            td(d.method)
+                        }
+                        tr {
+                            td(d.description)
                         }
                     }
                 }
@@ -65,22 +76,35 @@ class DocGenerator extends AbstractProcessor
         def basePath = element.getAnnotation(Path).value()
         def result = new ArrayList<Doc>()
 
-        element.enclosedElements.each {
-            if (it.kind == ElementKind.METHOD)
-            {
-                if (shouldDocument(it))
-                {
-                    result.add(new Doc(method(it), path(basePath, it)))
-                }
-            }
-        }
+        element.enclosedElements.each { docElement(it, basePath, result) }
 
         return result
     }
 
-    def path(final String basePath, final Element element)  {
-        if (element.getAnnotation(Path) != null)    {
-            return element.getAnnotation(Path).value()
+    def docElement(final Element element, final String basePath, final ArrayList<Doc> result)
+    {
+        if (element.kind == ElementKind.METHOD)
+        {
+            if (shouldDocument(element))
+            {
+                result.add(doc(element, basePath))
+            }
+        }
+    }
+
+    def doc(final Element element, final String basePath)
+    {
+        def d = new Doc(method(element), path(basePath, element))
+        d.description = processingEnv.elementUtils.getDocComment(element)
+
+        return d
+    }
+
+    def path(final String basePath, final Element element)
+    {
+        if (element.getAnnotation(Path) != null)
+        {
+            return basePath + element.getAnnotation(Path).value()
         }
 
         return basePath
