@@ -1,5 +1,4 @@
 package donkey
-
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
@@ -7,7 +6,6 @@ import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 import javax.tools.StandardLocation
@@ -128,97 +126,22 @@ class DocGenerator extends AbstractProcessor
         }
 
         def resource = new Resource(element.getAnnotation(Path).value(), consumes as String, produces as String)
-        def result = new ArrayList<Doc>()
+        def result = new ArrayList<MethodDocumentation>()
 
         element.enclosedElements.each { docElement(it, resource, result) }
 
         return result
     }
 
-    def docElement(final Element element, final Resource resource, final ArrayList<Doc> result)
+    def docElement(final Element element, final Resource resource, final ArrayList<MethodDocumentation> result)
     {
         if (element.kind == ElementKind.METHOD)
         {
             if (shouldDocument(element))
             {
-                result.add(doc(element, resource))
+                result.add(new MethodDocumentation(element, resource, processingEnv))
             }
         }
-    }
-
-    def doc(final Element element, final Resource resource)
-    {
-        def document = new Doc(method(element), path(resource.basePath, element))
-        document.label = element.simpleName.toString()
-        if (processingEnv.elementUtils.getDocComment(element))
-        {
-            document.description = processingEnv.elementUtils.getDocComment(element)
-        }
-        else
-        {
-            document.description = 'No description provided'
-        }
-
-        if (element.getAnnotation(Consumes))
-        {
-            document.consumes = '' + element.getAnnotation(Consumes).value()
-        }
-        else
-        {
-            document.consumes = '' + resource.consumes
-        }
-
-        if (element.getAnnotation(Produces))
-        {
-            document.produces = '' + element.getAnnotation(Produces).value()
-        }
-        else
-        {
-            document.produces = '' + resource.produces
-        }
-
-        document.pathParams = getPathParams(element)
-        document.headerParams = getHeaderParams(element)
-
-        return document
-    }
-
-    def getPathParams(final Element element)
-    {
-        def params = new ArrayList<Param>()
-        def m = element as ExecutableElement
-        m.parameters.each {
-            if (it.getAnnotation(PathParam) != null)
-            {
-                params.add(new Param(it.getAnnotation(PathParam).value(), it.asType().toString()))
-            }
-        }
-
-        return params
-    }
-
-    def getHeaderParams(final Element element)
-    {
-        def params = new ArrayList<Param>()
-        def m = element as ExecutableElement
-        m.parameters.each {
-            if (it.getAnnotation(HeaderParam) != null)
-            {
-                params.add(new Param(it.getAnnotation(HeaderParam).value(), it.asType().toString()))
-            }
-        }
-
-        return params
-    }
-
-    def path(final String basePath, final Element element)
-    {
-        if (element.getAnnotation(Path) != null)
-        {
-            return basePath + element.getAnnotation(Path).value()
-        }
-
-        return basePath
     }
 
     def shouldDocument(final Element element)
@@ -241,28 +164,6 @@ class DocGenerator extends AbstractProcessor
         }
 
         return false
-    }
-
-    def method(final Element element)
-    {
-        if (element.getAnnotation(GET))
-        {
-            return "GET"
-        }
-        if (element.getAnnotation(POST))
-        {
-            return "POST"
-        }
-        if (element.getAnnotation(PUT))
-        {
-            return "PUT"
-        }
-        if (element.getAnnotation(DELETE))
-        {
-            return "DELETE"
-        }
-
-        return "UNKNOWN"
     }
 
     def store(final Element element, final String filename, final String content)
@@ -299,23 +200,5 @@ class Param
     {
         this.name = name
         this.typeName = typeName
-    }
-}
-
-class Doc
-{
-    final String method
-    final String path
-    String label
-    String description
-    String consumes
-    String produces
-    List<Param> pathParams
-    List<Param> headerParams
-
-    Doc(final String method, final String path)
-    {
-        this.method = method
-        this.path = path
     }
 }
