@@ -57,22 +57,21 @@ class DocGenerator extends AbstractProcessor
                         docs.each { d ->
                             div(class: 'well') {
                                 h3(d.label)
-                                table(class: 'table') {
-                                    thead {
-                                        tr {
-                                            th('Path')
-                                            th('Method')
-                                            th('Consumes')
-                                            th('Produces')
-                                        }
-                                    }
-                                    tr {
-                                        td(d.path)
-                                        td(d.method)
-                                        td(d.consumes)
-                                        td(d.produces)
-                                    }
+                                h4('Endpoint')
+                                dl(class: 'dl-horizontal') {
+                                    dt('Path')
+                                    dd(d.path)
+                                    dt('Method')
+                                    dd(d.method)
+                                    dt('Consumes')
+                                    dd(d.consumes)
+                                    dt('Produces')
+                                    dd(d.produces)
                                 }
+                                h4('Path parameters')
+                                h4('Header parameters')
+                                h4('Message body')
+                                h4('Response')
                             }
                         }
                     }
