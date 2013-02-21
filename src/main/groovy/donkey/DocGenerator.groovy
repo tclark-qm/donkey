@@ -42,31 +42,36 @@ class DocGenerator extends AbstractProcessor
                 link(href: 'http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css', rel: 'stylesheet')
             }
             body {
-                h1(element.simpleName.toString())
-                if (intro != null)
-                {
-                    div {
-                        mkp.yieldUnescaped intro
+                div(class: 'hero-unit') {
+                    h1(element.simpleName.toString())
+
+                    if (intro != null)
+                    {
+                        p {
+                            mkp.yieldUnescaped intro
+                        }
                     }
                 }
                 div(class: 'row') {
-                    div(class: 'span12') {
+                    div(class: 'span11 offset1') {
                         docs.each { d ->
-                            h3(d.label)
-                            table(class: 'table') {
-                                thead {
-                                    tr {
-                                        th('Path')
-                                        th('Method')
-                                        th('Consumes')
-                                        th('Produces')
+                            div(class: 'well') {
+                                h3(d.label)
+                                table(class: 'table') {
+                                    thead {
+                                        tr {
+                                            th('Path')
+                                            th('Method')
+                                            th('Consumes')
+                                            th('Produces')
+                                        }
                                     }
-                                }
-                                tr {
-                                    td(d.path)
-                                    td(d.method)
-                                    td(d.consumes)
-                                    td(d.produces)
+                                    tr {
+                                        td(d.path)
+                                        td(d.method)
+                                        td(d.consumes)
+                                        td(d.produces)
+                                    }
                                 }
                             }
                         }
@@ -130,11 +135,28 @@ class DocGenerator extends AbstractProcessor
         {
             document.description = processingEnv.elementUtils.getDocComment(element)
         }
-        else {
+        else
+        {
             document.description = 'No description provided'
         }
-        document.consumes = '' + resource.consumes
-        document.produces = '' + resource.produces
+
+        if (element.getAnnotation(Consumes))
+        {
+            document.consumes = '' + element.getAnnotation(Consumes).value()
+        }
+        else
+        {
+            document.consumes = '' + resource.consumes
+        }
+
+        if (element.getAnnotation(Produces))
+        {
+            document.produces = '' + element.getAnnotation(Produces).value()
+        }
+        else
+        {
+            document.produces = '' + resource.produces
+        }
 
         return document
     }
