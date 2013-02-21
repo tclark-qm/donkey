@@ -48,9 +48,7 @@ class DocGenerator extends AbstractProcessor
 
                     if (intro != null)
                     {
-                        p {
-                            mkp.yieldUnescaped intro
-                        }
+                        mkp.yieldUnescaped intro
                     }
                 }
                 div(class: 'row') {
@@ -72,11 +70,14 @@ class DocGenerator extends AbstractProcessor
                                     dt('Produces')
                                     dd(d.produces)
                                 }
-                                h4('Path parameters')
-                                dl(class: 'dl-horizontal') {
-                                    d.pathParams.each { p ->
-                                        dt(p.name)
-                                        dd(p.typeName)
+                                if (d.pathParams.size() > 0)
+                                {
+                                    h4('Path parameters')
+                                    dl(class: 'dl-horizontal') {
+                                        d.pathParams.each { p ->
+                                            dt(p.name)
+                                            dd(p.typeName)
+                                        }
                                     }
                                 }
                                 h4('Header parameters')
