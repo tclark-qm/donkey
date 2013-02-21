@@ -89,6 +89,8 @@ class DocGenerator extends AbstractProcessor
                                     }
                                 }
                                 h4('Request body')
+                                d.requestBody
+                               
                                 h4('Response')
                             }
                         }
@@ -128,20 +130,16 @@ class DocGenerator extends AbstractProcessor
         def resource = new Resource(element.getAnnotation(Path).value(), consumes as String, produces as String)
         def result = new ArrayList<MethodDocumentation>()
 
-        element.enclosedElements.each { docElement(it, resource, result) }
+        element.enclosedElements.each {
+            if (it.kind == ElementKind.METHOD)
+            {
+                if (shouldDocument(it))
+                {
+                    result.add(new MethodDocumentation(it, resource, processingEnv))
+                }
+            } }
 
         return result
-    }
-
-    def docElement(final Element element, final Resource resource, final ArrayList<MethodDocumentation> result)
-    {
-        if (element.kind == ElementKind.METHOD)
-        {
-            if (shouldDocument(element))
-            {
-                result.add(new MethodDocumentation(element, resource, processingEnv))
-            }
-        }
     }
 
     def shouldDocument(final Element element)

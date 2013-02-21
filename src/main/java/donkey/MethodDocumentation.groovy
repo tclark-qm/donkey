@@ -1,7 +1,9 @@
 package donkey
+
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
+import javax.tools.Diagnostic
 import javax.ws.rs.*
 
 class MethodDocumentation
@@ -14,6 +16,7 @@ class MethodDocumentation
     final String produces
     final List<Param> pathParams
     final List<Param> headerParams
+    final String requestBody
 
     MethodDocumentation(final Element element, final Resource resource, final ProcessingEnvironment processingEnv)
     {
@@ -50,6 +53,7 @@ class MethodDocumentation
 
         this.pathParams = pathParams(element)
         this.headerParams = headerParams(element)
+        this.requestBody = requestBody(element, processingEnv)
     }
 
     private static String method(final Element element)
@@ -107,5 +111,23 @@ class MethodDocumentation
         }
 
         return params
+    }
+
+    private static String requestBody(final Element element, final ProcessingEnvironment processingEnv)
+    {
+        def m = element as ExecutableElement
+        m.parameters.each {
+            if(it.annotationMirrors.isEmpty())  {
+                println('ANNO:' + it.simpleName.toString())
+                return m.simpleName.toString()
+            }
+        }
+
+        return null
+    }
+
+    def log(final ProcessingEnvironment processingEnv, final String message)
+    {
+        processingEnv.messager.printMessage(Diagnostic.Kind.NOTE, message)
     }
 }
