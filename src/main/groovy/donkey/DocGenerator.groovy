@@ -7,6 +7,7 @@ import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 import javax.tools.StandardLocation
@@ -69,6 +70,12 @@ class DocGenerator extends AbstractProcessor
                                     dd(d.produces)
                                 }
                                 h4('Path parameters')
+                                dl(class: 'dl-horizontal') {
+                                    d.pathParams.each { p ->
+                                        dt(p.name)
+                                        dd(p.typeName)
+                                    }
+                                }
                                 h4('Header parameters')
                                 h4('Message body')
                                 h4('Response')
@@ -157,7 +164,23 @@ class DocGenerator extends AbstractProcessor
             document.produces = '' + resource.produces
         }
 
+        document.pathParams = getPathParams(element)
+
         return document
+    }
+
+    def getPathParams(final Element element)
+    {
+        def params = new ArrayList<Param>()
+        def m = element as ExecutableElement
+        m.parameters.each {
+            if (it.getAnnotation(PathParam) != null)
+            {
+                params.add(new Param(it.getAnnotation(PathParam).value(), it.asType().toString()))
+            }
+        }
+
+        return params
     }
 
     def path(final String basePath, final Element element)
@@ -239,6 +262,18 @@ class Resource
     }
 }
 
+class Param
+{
+    final String name
+    final String typeName
+
+    Param(final String name, final String typeName)
+    {
+        this.name = name
+        this.typeName = typeName
+    }
+}
+
 class Doc
 {
     final String method
@@ -247,6 +282,7 @@ class Doc
     String description
     String consumes
     String produces
+    List<Param> pathParams
 
     Doc(final String method, final String path)
     {
