@@ -58,6 +58,9 @@ class DocGenerator extends AbstractProcessor
                         docs.each { d ->
                             div(class: 'well') {
                                 h3(d.label)
+                                p {
+                                    mkp.yieldUnescaped d.description
+                                }
                                 h4('Endpoint')
                                 dl(class: 'dl-horizontal') {
                                     dt('Path')
