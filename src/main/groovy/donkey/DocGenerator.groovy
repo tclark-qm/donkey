@@ -80,8 +80,17 @@ class DocGenerator extends AbstractProcessor
                                         }
                                     }
                                 }
-                                h4('Header parameters')
-                                h4('Message body')
+                                if (d.headerParams.size() > 0)
+                                {
+                                    h4('Header parameters')
+                                    dl(class: 'dl-horizontal') {
+                                        d.headerParams.each { p ->
+                                            dt(p.name)
+                                            dd(p.typeName)
+                                        }
+                                    }
+                                }
+                                h4('Request body')
                                 h4('Response')
                             }
                         }
@@ -169,6 +178,7 @@ class DocGenerator extends AbstractProcessor
         }
 
         document.pathParams = getPathParams(element)
+        document.headerParams = getHeaderParams(element)
 
         return document
     }
@@ -181,6 +191,20 @@ class DocGenerator extends AbstractProcessor
             if (it.getAnnotation(PathParam) != null)
             {
                 params.add(new Param(it.getAnnotation(PathParam).value(), it.asType().toString()))
+            }
+        }
+
+        return params
+    }
+
+    def getHeaderParams(final Element element)
+    {
+        def params = new ArrayList<Param>()
+        def m = element as ExecutableElement
+        m.parameters.each {
+            if (it.getAnnotation(HeaderParam) != null)
+            {
+                params.add(new Param(it.getAnnotation(HeaderParam).value(), it.asType().toString()))
             }
         }
 
@@ -287,6 +311,7 @@ class Doc
     String consumes
     String produces
     List<Param> pathParams
+    List<Param> headerParams
 
     Doc(final String method, final String path)
     {
