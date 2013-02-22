@@ -89,9 +89,11 @@ class DocGenerator extends AbstractProcessor
                                         }
                                     }
                                 }
-                                h4('Request body')
-                                p(d.requestBody)
-
+                                if (d.requestBody)
+                                {
+                                    h4('Request body')
+                                    p(d.requestBody)
+                                }
                                 h4('Response')
                             }
                         }
@@ -146,24 +148,7 @@ class DocGenerator extends AbstractProcessor
 
     def shouldDocument(final Element element)
     {
-        if (element.getAnnotation(GET))
-        {
-            return true
-        }
-        if (element.getAnnotation(POST))
-        {
-            return true
-        }
-        if (element.getAnnotation(PUT))
-        {
-            return true
-        }
-        if (element.getAnnotation(DELETE))
-        {
-            return true
-        }
-
-        return false
+        return [GET, POST, PUT, DELETE, OPTIONS, HEAD].find { element.getAnnotation(it) != null } != null
     }
 
     def store(final Element element, final String filename, final String content)
