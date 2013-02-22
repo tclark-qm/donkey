@@ -89,10 +89,15 @@ class DocGenerator extends AbstractProcessor
                                         }
                                     }
                                 }
-                                if (d.requestBody)
+                                if (d.requestBody.size() > 0)
                                 {
                                     h4('Request body')
-                                    p(d.requestBody)
+                                    dl(class: 'dl-horizontal') {
+                                        d.requestBody.each { p ->
+                                            dt(p.name)
+                                            dd(p.typeName)
+                                        }
+                                    }
                                 }
                                 h4('Response')
                             }

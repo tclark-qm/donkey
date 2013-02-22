@@ -1,7 +1,10 @@
 package donkey
+
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.TypeElement
 import javax.ws.rs.*
 
 class MethodDocumentation
@@ -14,7 +17,7 @@ class MethodDocumentation
     final String produces
     final List<Param> pathParams
     final List<Param> headerParams
-    final String requestBody
+    final List<Param> requestBody
 
     MethodDocumentation(final Element element, final Resource resource, final ProcessingEnvironment processingEnv)
     {
@@ -111,18 +114,28 @@ class MethodDocumentation
         return params
     }
 
-    private static String requestBody(final Element element, final ProcessingEnvironment processingEnv)
+    private static ArrayList<Param> requestBody(final Element element, final ProcessingEnvironment processingEnv)
     {
+        def params = new ArrayList<Param>()
         def m = element as ExecutableElement
 
         def body = m.parameters.find {
             it.annotationMirrors.isEmpty()
         }
 
-        if (body)  {
-            return body.simpleName.toString()
+        if (body)
+        {
+            println('TYPE>>>' + body.asType().toString())
+
+            def t = processingEnv.typeUtils.asElement(body.asType()) as TypeElement
+            def fields = t.enclosedElements.findAll { it.kind == ElementKind.FIELD }
+
+
+            fields.each {
+                params.add(new Param(it.simpleName.toString(), it.asType().toString()))
+            }
         }
 
-        return null
+        return params
     }
 }
