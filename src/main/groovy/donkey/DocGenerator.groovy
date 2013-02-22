@@ -1,4 +1,5 @@
 package donkey
+
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
@@ -89,8 +90,8 @@ class DocGenerator extends AbstractProcessor
                                     }
                                 }
                                 h4('Request body')
-                                d.requestBody
-                               
+                                p(d.requestBody)
+
                                 h4('Response')
                             }
                         }
@@ -137,7 +138,8 @@ class DocGenerator extends AbstractProcessor
                 {
                     result.add(new MethodDocumentation(it, resource, processingEnv))
                 }
-            } }
+            }
+        }
 
         return result
     }

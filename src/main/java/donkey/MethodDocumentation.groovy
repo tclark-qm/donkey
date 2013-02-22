@@ -1,9 +1,7 @@
 package donkey
-
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
-import javax.tools.Diagnostic
 import javax.ws.rs.*
 
 class MethodDocumentation
@@ -116,18 +114,15 @@ class MethodDocumentation
     private static String requestBody(final Element element, final ProcessingEnvironment processingEnv)
     {
         def m = element as ExecutableElement
-        m.parameters.each {
-            if(it.annotationMirrors.isEmpty())  {
-                println('ANNO:' + it.simpleName.toString())
-                return m.simpleName.toString()
-            }
+
+        def body = m.parameters.find {
+            it.annotationMirrors.isEmpty()
+        }
+
+        if (body)  {
+            return body.simpleName.toString()
         }
 
         return null
-    }
-
-    def log(final ProcessingEnvironment processingEnv, final String message)
-    {
-        processingEnv.messager.printMessage(Diagnostic.Kind.NOTE, message)
     }
 }
